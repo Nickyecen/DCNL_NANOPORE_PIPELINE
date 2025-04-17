@@ -1,6 +1,7 @@
 # project
 data
 dataset
+images
 results
 work
 .nextflow

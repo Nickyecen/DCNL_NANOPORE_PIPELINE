@@ -16,6 +16,12 @@ NextFlow pipeline used by the Developmental Cognitive Neuroscience Lab (DCNL) to
 
 1. Install `git`, `java`, `nextflow` and `apptainer`:
 
+    - Install Git and LZ4 compression library:
+
+      ```sh
+      sudo apt install git lz4
+      ```
+
     - Install Java: install either [OpenJRE/JDK][openjava] (**recommended, see below**) or [OracleJRE/JDK][oraclejava]. to install both openjre and openjdk using Debian/Ubuntu:
 
       ```sh
@@ -28,11 +34,12 @@ NextFlow pipeline used by the Developmental Cognitive Neuroscience Lab (DCNL) to
 1. Check that all dependencies are accessible via your users `$PATH`:
 
     ```sh
-    which {git,java,apptainer,nextflow}
+    which {git,lz4,java,apptainer,nextflow}
     ```
 
     ```txt
     /usr/bin/git
+    /usr/bin/lz4
     /usr/bin/java
     /usr/bin/apptainer
     /home/$USER/.local/bin/nextflow
@@ -47,13 +54,16 @@ NextFlow pipeline used by the Developmental Cognitive Neuroscience Lab (DCNL) to
 
 1. Make sure you have both the sequencing and reference genomes/assemblies files you need to run the pipeline. By convention, the sequencing files (`.fast5` or `.pod5` format) should be stored on `data/` (`mkdir data`), while the reference files (`.fa` format) should be stored on `references/`. Reference files are specific to the organism under study (human, rat, etc.).
 
-1. Set `NXF_APPTAINER_CACHEDIR` environment variable to your users' `apptainer` home directory, as follows:
+1. Build your container image as follows:
+
+    > **Note.** This will take a while to complete...
 
     ```sh
-    NXF_APPTAINER_CACHEDIR="$HOME/apptainer/cache/"
-    mkdir -p "$NXF_APPTAINER_CACHEDIR"    
-    echo "export NXF_APPTAINER_CACHEDIR=$NXF_APPTAINER_CACHEDIR" | tee -a ~/.bashrc
-    source ~/.bashrc
+    mkdir images
+    apptainer build \
+      --mksquashfs-args="-comp lz4" \
+      images/debian-nanopore.sif \
+      containers/debian-nanopore.def
     ```
 
 1. You should now be able to run the `nextflow` pipeline (`workflow/main.nf`). See [Pipeline parameters](#pipeline-parameters) and [Examples](#examples) for details.
