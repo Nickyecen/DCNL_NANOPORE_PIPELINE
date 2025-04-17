@@ -1,0 +1,17 @@
+# project
+data
+dataset
+results
+work
+.nextflow
+
+# special dirs and files (e.g., potentially sensistive or large data files)
+.nextflow.log*
+*.fa
+*.fast5
+*.fastq.*
+*.pod5
+*.bam
+*.csv
+*.zip
+*.tar.gz
