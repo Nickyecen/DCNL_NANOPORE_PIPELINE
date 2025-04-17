@@ -52,7 +52,7 @@ NextFlow pipeline used by the Developmental Cognitive Neuroscience Lab (DCNL) to
     ```sh
     NXF_APPTAINER_CACHEDIR="$HOME/apptainer/cache/"
     mkdir -p "$NXF_APPTAINER_CACHEDIR"    
-    echo "export NXF_APPTAINER_CACHEDIR" | tee -a ~/.bashrc
+    echo "export NXF_APPTAINER_CACHEDIR=$NXF_APPTAINER_CACHEDIR" | tee -a ~/.bashrc
     source ~/.bashrc
     ```
 
