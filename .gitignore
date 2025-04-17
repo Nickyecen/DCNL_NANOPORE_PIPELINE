@@ -4,6 +4,8 @@ dataset
 results
 work
 .nextflow
+.vscode
+.idea
 
 # special dirs and files (e.g., potentially sensistive or large data files)
 .nextflow.log*
