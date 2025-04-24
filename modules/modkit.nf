@@ -1,38 +1,32 @@
 process MODKIT {
 
-    publishDir "${params.steps_2_and_3_input_directory}/modkit/", mode: "copy", pattern: "*", overwrite: true
-     
+        publishDir "${params.steps_2_and_3_input_directory}/modkit/", mode: "copy", pattern: "*", overwrite: true
+        label 'cpu'
 
-    label 'cpu'
+        input:
+                tuple val(id), path(bam)
+                path bai
 
-    input:
-        tuple val(id), path(bam)     
-        path(bai)
+        output:
+                path "*"
 
-    output:
-        path("*")
+        script:
+                """
+                echo "starting modkit"
+        
+                ## Make Methylation TSV file
+                modkit extract full --queue-size 1000 -t 4 -i 10000 --mapped-only "${bam}" "${id}_modkit_output.tsv"
 
-    script:
-        """
-       
-	echo "starting modkit"
- 
-        ## Make Methylation TSV file
-        modkit extract full --queue-size 1000 -t 4 -i 10000 --mapped-only "${bam}" "${id}_modkit_output.tsv"
+                echo "extract successful"
+                
+                ## Make Methylation Table
+                modkit pileup -t 4 -i 10000 --chunk-size 4 "${bam}" "${id}_modkit_pileup.bed" --log-filepath "${id}_modkit_pileup.log"
 
-	echo "extract successful"
-	
-        ## Make Methylation Table
-        modkit pileup -t 4 -i 10000 --chunk-size 4 "${bam}" "${id}_modkit_pileup.bed" --log-filepath "${id}_modkit_pileup.log"
+                echo "pileup successful"
 
-	echo "pileup successful"
-
-        ## Make Summary
-        modkit summary -i 10000 ${bam}  > "${id}_modkit_summary.txt"
-	
-	echo "summary successful"
-
-        """
-
+                ## Make Summary
+                modkit summary -i 10000 ${bam}  > "${id}_modkit_summary.txt"
+                
+                echo "summary successful"
+                """
 }
-
