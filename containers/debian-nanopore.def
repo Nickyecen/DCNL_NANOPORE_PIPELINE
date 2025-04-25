@@ -1,0 +1,90 @@
+Bootstrap: docker
+From: debian:12
+
+%post
+	# Install basic packages and get update
+	apt-get update && apt-get install -y \
+	locales \
+	libarchive-dev \
+	wget \
+	gcc \
+	cmake \
+	g++ \
+	jq
+
+	# Set timezone and language for container ##
+	ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
+	export LANGUAGE=en_US.UTF-8
+	export LANG=en_US.UTF-8
+	export LC_ALL=en_US.UTF-8
+	locale-gen en_US.UTF-8
+	echo 'export LANGUAGE="en_US.UTF8"' >> $SINGULARITY_ENVIRONMENT
+	echo 'export LANG="en_US.UTF8"' >> $SINGULARITY_ENVIRONMENT
+	echo 'export LC_ALL="en_US.UTF8"' >> $SINGULARITY_ENVIRONMENT
+
+	# Install miniconda
+	cd /
+	wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+	bash Miniconda3-latest-Linux-x86_64.sh -bfp /conda
+	export PATH="/conda/bin:$PATH"
+	echo 'export PATH="/conda/bin:$PATH"' >> $SINGULARITY_ENVIRONMENT
+	conda config --add channels bioconda
+	conda config --add channels conda-forge
+	
+	# Install python packages
+	pip install pod5 pycoQC
+
+	# Install samtools
+	conda install -c bioconda samtools bedtools multiqc
+
+	# Install modkit
+	mkdir /opt/modkit/
+	cd /opt/modkit/
+	wget https://github.com/nanoporetech/modkit/releases/download/v0.4.1/modkit_v0.4.1_u16_x86_64.tar.gz
+	tar -xzf modkit_v0.4.1_u16_x86_64.tar.gz
+	rm modkit_v0.4.1_u16_x86_64.tar.gz
+	echo 'export PATH="/opt/modkit/dist_modkit_v0.4.1_cec0a0b:$PATH"' >> $SINGULARITY_ENVIRONMENT
+
+	# Install Dorado
+	mkdir /opt/dorado/
+	cd /opt/dorado/
+	wget https://cdn.oxfordnanoportal.com/software/analysis/dorado-0.8.1-linux-x64.tar.gz
+	tar -xzvf dorado-0.8.1-linux-x64.tar.gz
+	rm dorado-0.8.1-linux-x64.tar.gz
+	echo 'export PATH="/opt/dorado/dorado-0.8.1-linux-x64/bin/:$PATH"' >> $SINGULARITY_ENVIRONMENT
+
+%test
+	# Check if installations are on path and display their versions
+	dorado --version
+	pod5 --version
+	samtools --version
+	modkit --version
+	pycoQC --version
+	multiqc --version
+	bedtools --version
+	jq --version
+
+%labels
+	author Joao Chrusciel
+	version v0.3.0
+
+%help
+	Software included in the container are:
+
+	dorado==0.8.1
+	modkit==0.4.1
+	samtools==1.19.2
+	python==3.12.2
+	pod5==0.3.6
+	pycoQC==2.5.2
+	conda==24.1.2
+	pip==23.3.1
+ 	bedtools==2.31.1
+	multiqc==1.17
+	jq==1.6
+	
+	NOTE THAT VERSIONS OF THE SOFTWARE INSTALLED WILL CHANGE THROUGH
+	TIME IF YOU BUILD THE IMAGE FROM THE RECIPE FILE.
+
+	For more information about the use of this singularity container access:
+	https://gmapsrv.pucrs.br/gitlab/ccd-public/nanopore

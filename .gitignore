@@ -1,0 +1,20 @@
+# project
+data
+dataset
+images
+results
+work
+.nextflow
+.vscode
+.idea
+
+# special dirs and files (e.g., potentially sensistive or large data files)
+.nextflow.log*
+*.fa
+*.fast5
+*.fastq.*
+*.pod5
+*.bam
+*.csv
+*.zip
+*.gz
