@@ -1,5 +1,4 @@
 // Import Modules
-
 include { MULTIQC } from '../modules/multiqc.nf'
 include { MODKIT } from '../modules/modkit.nf'
 include { MERGE_QC_REPORT } from '../modules//num_reads_report.nf'
