@@ -53,6 +53,7 @@ process BASECALL_CPU {
         dorado summary "${id}.bam" > "${id}.txt"
         """
 }
+
 process BASECALL_CPU_DEMUX {
     publishDir "results/${params.out_dir}/basecalling_output/", mode: "copy", overwrite: true
     label 'cpu'
@@ -142,13 +143,14 @@ process BASECALL_GPU {
             else
                 dorado basecaller "${speed},${mods}" . --trim "${trim}" --min-qscore "${qscore}" --reference "${ref}" --device "cuda:${devices}" > "${id}.bam"
             fi
-            else
+        else
             if [[ "${mods}" == "false" ]]; then
                 dorado basecaller "${speed}" . --trim "${trim}" --config "${config}" --min-qscore "${qscore}" --reference "${ref}" --device "cuda:${devices}" > "${id}.bam"
             else
                 dorado basecaller "${speed},${mods}" . --trim "${trim}" --config "${config}" --min-qscore "${qscore}" --reference "${ref}" --device "cuda:${devices}" > "${id}.bam"
             fi
         fi
+
         samtools sort -@ -12 "${id}.bam" -o "${id}_sorted.bam"
         rm "${id}.bam"
         mv "${id}_sorted.bam" "${id}.bam"
@@ -186,7 +188,6 @@ process BASECALL_GPU_DEMUX {
             fi
         else
             if [[ "${mods}" == "false" ]]; then
-
                 dorado basecaller "${speed}" . --trim "none" --config "${config}" --min-qscore "${qscore}" --reference "${ref}" --device "cuda:${devices}" > "${id}.bam"
             else
                 dorado basecaller "${speed},${mods}" . --trim "none" --config "${config}" --min-qscore "${qscore}" --reference "${ref}" --device "cuda:${devices}" > "${id}.bam"
@@ -205,9 +206,10 @@ process BASECALL_GPU_DEMUX {
 
         cd ./demux_data/
         for file in *; do
-	    samtools sort -@ -12 "\$file" -o "${id}_\${file}"
-	    rm "\$file"	
+            samtools sort -@ -12 "\$file" -o "${id}_\${file}"
+            rm "\$file"	
         done
+        
         cd ../
         rm "${id}.bam"
         mv ./demux_data/* ./

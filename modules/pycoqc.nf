@@ -1,5 +1,4 @@
 process PYCOQC_NO_FILTER {
-
     publishDir "results/${params.out_dir}/pycoqc_no_filter/", mode: 'copy', overwrite: true, pattern: "*-Unfiltered_pycoqc*"
     label 'cpu'
 
@@ -36,7 +35,6 @@ process PYCOQC_NO_FILTER {
 }
 
 process PYCOQC_FILTER {
-
     publishDir "results/${params.out_dir}/pycoqc_filtered/", mode: 'copy', overwrite: true, pattern: "*-Filtered_pycoqc*"
     label 'cpu'
 

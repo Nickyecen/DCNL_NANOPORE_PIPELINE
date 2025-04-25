@@ -24,7 +24,6 @@ process CALCULATE_COVERAGE {
         """
 }
 process MERGE_COVERAGE {
-
     publishDir "${params.steps_2_and_3_input_directory}/calculate_coverage/", mode: "copy", pattern: "*", overwrite: true
     label 'cpu'
 

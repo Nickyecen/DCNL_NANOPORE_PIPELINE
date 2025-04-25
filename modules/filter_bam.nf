@@ -1,5 +1,4 @@
 process FILTER_BAM {
-    
     publishDir "results/${params.out_dir}/bam_filtering/", mode: "copy", pattern: "*.ba*", overwrite: true
     publishDir "results/${params.out_dir}/multiqc_input/minimap2/", mode: "copy", pattern: "*.*stat", overwrite: true
     label 'cpu'
@@ -31,17 +30,15 @@ process FILTER_BAM {
         samtools index "${id}-Filtered_primary_mapq_${mapq}.bam"
         samtools flagstat "${id}-Filtered_primary_mapq_${mapq}.bam" > "${id}-Filtered_primary_mapq_${mapq}.flagstat"
         samtools idxstats "${id}-Filtered_primary_mapq_${mapq}.bam" > "${id}-Filtered_primary_mapq_${mapq}.idxstat"
-
-	var=\$(awk 'NR==8 {print \$1}' "${id}-Filtered_primary_mapq_${mapq}.flagstat")	
-
-	## If flagstat file says there are no mapped reads then delete bam and bai files.
+        var=\$(awk 'NR==8 {print \$1}' "${id}-Filtered_primary_mapq_${mapq}.flagstat")	
+        ## If flagstat file says there are no mapped reads then delete bam and bai files.
         ## Since we passed optional on the output statement lines the script should still run fine even
-	## When the files are deleted. However, I never used optional before so I am not 100% sure
-	if [ \$var -lt "${params.min_mapped_reads_thresh}" ]; then
- 		rm ${id}-*
-	else
-        	id="${id}"
-		cp "${txt}" "${id}_sequencing_summary.txt"
+        ## When the files are deleted. However, I never used optional before so I am not 100% sure
+        if [ \$var -lt "${params.min_mapped_reads_thresh}" ]; then
+            rm ${id}-*
+        else
+            id="${id}"
+    		cp "${txt}" "${id}_sequencing_summary.txt"
         fi
         rm "intermediate.bam"
         """
