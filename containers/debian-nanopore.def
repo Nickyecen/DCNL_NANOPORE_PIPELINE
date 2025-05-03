@@ -2,89 +2,87 @@ Bootstrap: docker
 From: debian:12
 
 %post
-	# Install basic packages and get update
-	apt-get update && apt-get install -y \
-	locales \
-	libarchive-dev \
-	wget \
-	gcc \
-	cmake \
-	g++ \
-	jq
+    # Install all basic packages and get update
+    # using clean and rm at the end just to clean some temporary files
+    apt-get update && apt-get install -y \
+    locales \
+    wget \
+    git \
+    jq \
+    python3 \
+    python3-pip \
+    cython3 \
+    samtools \
+    bedtools \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-	# Set timezone and language for container ##
-	ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
-	export LANGUAGE=en_US.UTF-8
-	export LANG=en_US.UTF-8
-	export LC_ALL=en_US.UTF-8
-	locale-gen en_US.UTF-8
-	echo 'export LANGUAGE="en_US.UTF8"' >> $SINGULARITY_ENVIRONMENT
-	echo 'export LANG="en_US.UTF8"' >> $SINGULARITY_ENVIRONMENT
-	echo 'export LC_ALL="en_US.UTF8"' >> $SINGULARITY_ENVIRONMENT
+    # Set timezone and language for container ##
+    ln -fs /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
+    locale-gen en_US.UTF-8
+    echo 'export LANGUAGE="en_US.UTF8"' >> "$SINGULARITY_ENVIRONMENT"
+    echo 'export LANG="en_US.UTF8"' >> "$SINGULARITY_ENVIRONMENT"
+    echo 'export LC_ALL="en_US.UTF8"' >> "$SINGULARITY_ENVIRONMENT"
 
-	# Install miniconda
-	cd /
-	wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-	bash Miniconda3-latest-Linux-x86_64.sh -bfp /conda
-	export PATH="/conda/bin:$PATH"
-	echo 'export PATH="/conda/bin:$PATH"' >> $SINGULARITY_ENVIRONMENT
-	conda config --add channels bioconda
-	conda config --add channels conda-forge
-	
-	# Install python packages
-	pip install pod5 pycoQC
+    # Install python packages
+    # using no-cache-dir so we dont keep a copy of the downloaded package
+    # and break-system-packages to override PEP 668 (which blocks pip installs)
+    pip install --no-cache-dir --break-system-packages \
+    pod5==0.3.23 \
+    multiqc==1.28 \
+    plotly==5.18.0
 
-	# Install samtools
-	conda install -c bioconda samtools bedtools multiqc
+    # Clone and install pycoQC 3.0.0 from duceppemo fork (altering plotly version to match MultiQC plotly version >= 5.18)
+    cd /opt
+    git clone https://github.com/duceppemo/pycoQC.git
+    cd pycoQC
+    sed -i 's/plotly==5.16.1/plotly==5.18.0/' setup.py
+    python3 setup.py install
 
-	# Install modkit
-	mkdir /opt/modkit/
-	cd /opt/modkit/
-	wget https://github.com/nanoporetech/modkit/releases/download/v0.4.1/modkit_v0.4.1_u16_x86_64.tar.gz
-	tar -xzf modkit_v0.4.1_u16_x86_64.tar.gz
-	rm modkit_v0.4.1_u16_x86_64.tar.gz
-	echo 'export PATH="/opt/modkit/dist_modkit_v0.4.1_cec0a0b:$PATH"' >> $SINGULARITY_ENVIRONMENT
+    # Install modkit
+    cd /opt
+    mkdir modkit && cd modkit
+    wget https://github.com/nanoporetech/modkit/releases/download/v0.4.4/modkit_v0.4.4_u16_x86_64.tar.gz
+    tar -xzf modkit_v0.4.4_u16_x86_64.tar.gz
+    rm modkit_v0.4.4_u16_x86_64.tar.gz
+    echo 'export PATH="/opt/modkit/dist_modkit_v0.4.4_7cf558c:$PATH"' >> "$SINGULARITY_ENVIRONMENT"
 
-	# Install Dorado
-	mkdir /opt/dorado/
-	cd /opt/dorado/
-	wget https://cdn.oxfordnanoportal.com/software/analysis/dorado-0.8.1-linux-x64.tar.gz
-	tar -xzvf dorado-0.8.1-linux-x64.tar.gz
-	rm dorado-0.8.1-linux-x64.tar.gz
-	echo 'export PATH="/opt/dorado/dorado-0.8.1-linux-x64/bin/:$PATH"' >> $SINGULARITY_ENVIRONMENT
+    # Install Dorado
+    cd /opt
+    mkdir dorado && cd dorado
+    wget https://cdn.oxfordnanoportal.com/software/analysis/dorado-0.9.6-linux-x64.tar.gz
+    tar -xzf dorado-0.9.6-linux-x64.tar.gz
+    rm dorado-0.9.6-linux-x64.tar.gz
+    echo 'export PATH="/opt/dorado/dorado-0.9.6-linux-x64/bin/:$PATH"' >> "$SINGULARITY_ENVIRONMENT"
 
 %test
-	# Check if installations are on path and display their versions
-	dorado --version
-	pod5 --version
-	samtools --version
-	modkit --version
-	pycoQC --version
-	multiqc --version
-	bedtools --version
-	jq --version
+    # Check if installations are on path and display their versions
+    dorado --version
+    modkit --version
+    pod5 --version
+    pycoQC --version
+    multiqc --version
+    samtools --version
+    bedtools --version
+    jq --version
 
 %labels
-	author Joao Chrusciel
-	version v0.3.0
+    author Joao Henrique Chrusciel
+    version v0.4.0
 
 %help
-	Software included in the container are:
+    Software included in the container are:
 
-	dorado==0.8.1
-	modkit==0.4.1
-	samtools==1.19.2
-	python==3.12.2
-	pod5==0.3.6
-	pycoQC==2.5.2
-	conda==24.1.2
-	pip==23.3.1
- 	bedtools==2.31.1
-	multiqc==1.17
-	jq==1.6
-	
-	NOTE THAT VERSIONS OF THE SOFTWARE INSTALLED WILL CHANGE THROUGH
-	TIME IF YOU BUILD THE IMAGE FROM THE RECIPE FILE.
+    dorado==0.9.6
+    modkit==0.4.4
+    samtools==1.16.1
+    pod5==0.3.23
+    pycoQC==2.5.2
+    bedtools==2.30.0
+    multiqc==1.28
+    jq==1.6
 
-	For more information about the use of this singularity container access:
-	https://gmapsrv.pucrs.br/gitlab/ccd-public/nanopore
+    NOTE THAT VERSIONS OF THE SOFTWARE INSTALLED WILL CHANGE THROUGH
+    TIME IF YOU BUILD THE IMAGE FROM THE RECIPE FILE.
+
+    For more information about the use of this singularity container access:
+    https://gmapsrv.pucrs.br/gitlab/ccd-public/nanopore
