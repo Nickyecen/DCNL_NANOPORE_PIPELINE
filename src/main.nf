@@ -46,10 +46,10 @@ MultiQC configuration file                          : ${params.multiqc_config}
 }
 
 // Import Workflows
-include {BASECALLING} from '../sub_workflows/BASECALLING'
-include {FILTERING_AND_QC_FROM_STEP_1} from '../sub_workflows/FILTERING_AND_QC_FROM_STEP_1.nf'
-include {FILTERING_AND_QC_FROM_MINKNOW} from '../sub_workflows/FILTERING_AND_QC_FROM_MINKNOW.nf'
-include {MODKIT_AND_MULTIQC} from '../sub_workflows/MODKIT_AND_MULTIQC.nf'
+include {BASECALLING} from './sub_workflows/BASECALLING'
+include {FILTERING_AND_QC_FROM_STEP_1} from './sub_workflows/FILTERING_AND_QC_FROM_STEP_1.nf'
+include {FILTERING_AND_QC_FROM_MINKNOW} from './sub_workflows/FILTERING_AND_QC_FROM_MINKNOW.nf'
+include {MODKIT_AND_MULTIQC} from './sub_workflows/MODKIT_AND_MULTIQC.nf'
 
 // Define initial files and channels
 if (params.step.toString() == "1") {
