@@ -1,6 +1,3 @@
-// Make this pipeline a nextflow 2 implementation
-nextflow.enable.dsl=2
-
 // Import sub-workflows
 include {BASECALLING} from './sub_workflows/BASECALLING'
 include {FILTERING_AND_QC_FROM_STEP_1} from './sub_workflows/FILTERING_AND_QC_FROM_STEP_1.nf'
