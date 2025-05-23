@@ -65,7 +65,7 @@ workflow {
         basecall_mods = Channel.value(params.basecall_mods)
         basecall_config = Channel.value(params.basecall_config)
         basecall_trim = Channel.value(params.basecall_trim)
-        basecall_compute = Channel.value(params.basecall_compute)
+        // basecall_compute = Channel.value(params.basecall_compute)
         trim_barcode = Channel.value(params.trim_barcode)
         devices = Channel.value(params.gpu_devices)
     } else if (params.step.toString() == "2_from_step_1") {
