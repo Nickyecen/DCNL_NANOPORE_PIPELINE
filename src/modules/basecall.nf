@@ -14,7 +14,7 @@ process FAST5_to_POD5 {
         """
 }
 
-process BASECALL_GPU {
+process BASECALL {
     publishDir "results/${params.out_dir}/basecalling_output/", mode: "copy", overwrite: true
     label 'gpu'
 
@@ -34,6 +34,7 @@ process BASECALL_GPU {
 
     script:
         """
+        echo "Basecalling started for: ${id}"
         if [[ "${config}" == "false" ]]; then    
             if [[ "${mods}" == "false" ]]; then 
                 dorado basecaller "${speed}" . --trim "${trim}" --min-qscore "${qscore}" --reference "${ref}" --device "cuda:${devices}" > "${id}.bam" 
@@ -48,14 +49,18 @@ process BASECALL_GPU {
             fi
         fi
 
+        echo "Basecalling completed, sorting bams..."
         samtools sort -@ -12 "${id}.bam" -o "${id}_sorted.bam"
         rm "${id}.bam"
         mv "${id}_sorted.bam" "${id}.bam"
+
+        echo "Bams sorted, generating summary with dorado..."
         dorado summary "${id}.bam" > "${id}.txt"
+        echo "Process completed for: ${id}"
         """
 }
 
-process BASECALL_GPU_DEMUX {
+process BASECALL_DEMUX {
     publishDir "results/${params.out_dir}/basecalling_output/", mode: "copy", overwrite: true
     label 'gpu'
 
@@ -76,6 +81,7 @@ process BASECALL_GPU_DEMUX {
 
     script:
         """
+        echo "Demultiplexed basecalling started for: ${id}"
         if [[ "${config}" == "false" ]]; then
             if [[ "${mods}" == "false" ]]; then
                 dorado basecaller "${speed}" . --trim "none" --min-qscore "${qscore}" --reference "${ref}" --device "cuda:${devices}" > "${id}.bam"
@@ -90,22 +96,28 @@ process BASECALL_GPU_DEMUX {
             fi
         fi
 
+        echo "Basecalling completed, sorting bams..."
 	    samtools sort -@ -12 "${id}.bam" -o "${id}_sorted.bam"
     	rm "${id}.bam"
     	mv "${id}_sorted.bam" "${id}.bam"
-	
+
+        echo "Bams sorted, demultiplexing..."
         if [[ "${trim_barcode}" == "true" ]]; then
+            echo "Demultiplexing with barcode trimming..."
             dorado demux --output-dir "./demux_data/" --no-classify "${id}.bam"
         else
+            echo "Demultiplexing without barcode trimming..."
             dorado demux --no-trim --output-dir "./demux_data/" --no-classify "${id}.bam"
         fi
-
+        
+        echo "Demultiplexing completed, sorting barcode files..."
         cd ./demux_data/
         for file in *; do
             samtools sort -@ -12 "\$file" -o "${id}_\${file}"
-            rm "\$file"	
+            rm "\$file"
         done
         
+        echo "Bams sorted, generating summary with dorado..."
         cd ../
         rm "${id}.bam"
         mv ./demux_data/* ./
@@ -114,5 +126,6 @@ process BASECALL_GPU_DEMUX {
             new_id="\${file%%.*}"
             dorado summary "\$file" > "\${new_id}.txt"
         done
+        echo "Process completed for: ${id}"
         """
 }
