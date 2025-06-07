@@ -49,10 +49,10 @@ From: debian:12
     # Install Dorado
     cd /opt
     mkdir dorado && cd dorado
-    wget https://cdn.oxfordnanoportal.com/software/analysis/dorado-0.9.6-linux-x64.tar.gz
-    tar -xzf dorado-0.9.6-linux-x64.tar.gz
-    rm dorado-0.9.6-linux-x64.tar.gz
-    echo 'export PATH="/opt/dorado/dorado-0.9.6-linux-x64/bin/:$PATH"' >> "$SINGULARITY_ENVIRONMENT"
+    wget https://cdn.oxfordnanoportal.com/software/analysis/dorado-1.0.1-linux-x64.tar.gz
+    tar -xzf dorado-1.0.1-linux-x64.tar.gz
+    rm dorado-1.0.1-linux-x64.tar.gz
+    echo 'export PATH="/opt/dorado/dorado-1.0.1-linux-x64/bin/:$PATH"' >> "$SINGULARITY_ENVIRONMENT"
 
 %test
     # Check if installations are on path and display their versions
@@ -67,12 +67,12 @@ From: debian:12
 
 %labels
     author Joao Henrique Chrusciel
-    version v0.4.0
+    version v0.5.0
 
 %help
     Software included in the container are:
 
-    dorado==0.9.6
+    dorado==1.0.1
     modkit==0.4.4
     samtools==1.16.1
     pod5==0.3.23
