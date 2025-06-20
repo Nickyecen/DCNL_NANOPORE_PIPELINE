@@ -22,7 +22,7 @@ NextFlow pipeline used by the Developmental Cognitive Neuroscience Lab (DCNL) to
       sudo apt install git lz4
       ```
 
-    - Install Java: install either [OpenJRE/JDK][openjava] (**recommended, see below**) or [OracleJRE/JDK][oraclejava]. to install both openjre and openjdk using Debian/Ubuntu:
+    - Install Java: install either [OpenJRE/JDK][openjava] (**recommended, see below**) or [OracleJRE/JDK][oraclejava]. To install both openjre and openjdk using Debian/Ubuntu:
 
       ```sh
       sudo apt install default-jre default-jdk
@@ -30,6 +30,11 @@ NextFlow pipeline used by the Developmental Cognitive Neuroscience Lab (DCNL) to
 
     - Install [NextFlow][nextflow-docs-install] (skip Java installation)
     - Install [Apptainer][apptainer-docs-install-deb]
+    - Install [NVIDIA Container Toolkit][nvidia-container-toolkit]: This enables Apptainer to access your GPU during basecalling. After installing it, to know if you have GPU support inside the container you can download a test container and check it by running:
+  
+    ```sh
+    apptainer pull docker://nvidia/cuda:12.2.0-base-ubuntu22.04 && apptainer exec --nvccli cuda_12.2.0-base-ubuntu22.04.sif nvidia-smi
+    ```
 
 1. Check that all dependencies are accessible via your users `$PATH`:
 
@@ -72,6 +77,7 @@ NextFlow pipeline used by the Developmental Cognitive Neuroscience Lab (DCNL) to
 [oraclejava]:https://www.java.com/en/download/linux_manual.jsp
 [nextflow-docs-install]:https://www.nextflow.io/docs/latest/install.html#install-nextflow
 [apptainer-docs-install-deb]:https://apptainer.org/docs/admin/main/installation.html#install-debian-packages
+[nvidia-container-toolkit]:https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
 
 [top](#table-of-contents)
 
