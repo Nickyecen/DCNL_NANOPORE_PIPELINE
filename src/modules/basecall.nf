@@ -29,8 +29,8 @@ process BASECALL {
         path ref
 
     output:
-        path ("*.bam"), emit: bam
-        path ("*.txt"), emit: txt
+        path ("${id}.bam"), emit: bam
+        path ("${id}.txt"), emit: txt
 
     script:
         """
@@ -76,8 +76,8 @@ process BASECALL_DEMUX {
         path ref
 
     output:
-        path ("*.bam"), emit: bam
-        path ("*.txt"), emit: txt
+        path ("${id}.bam"), emit: bam
+        path ("${id}.txt"), emit: txt
 
     script:
         """
