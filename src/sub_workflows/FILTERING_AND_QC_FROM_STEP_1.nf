@@ -6,13 +6,13 @@ include { MAKE_QC_REPORT } from '../modules/num_reads_report.nf'
 
 workflow FILTERING_AND_QC_FROM_STEP_1 {
     take:
-        bams
-        txts
+        bam_files
+        txt_files
         mapq
-        quality_score
+        qscore_thresh
 
     main:
-        FILTER_BAM(bams, txts, mapq)
+        FILTER_BAM(bam_files, txt_files, mapq)
         PYCOQC_NO_FILTER(
             FILTER_BAM.out.id,
             FILTER_BAM.out.total_bam,
@@ -22,7 +22,7 @@ workflow FILTERING_AND_QC_FROM_STEP_1 {
             FILTER_BAM.out.unfiltered_flagstat,
             FILTER_BAM.out.filtered_flagstat,
             FILTER_BAM.out.txt,
-            quality_score,
+            qscore_thresh,
         )
         PYCOQC_FILTER(
             PYCOQC_NO_FILTER.out.id,
@@ -31,7 +31,7 @@ workflow FILTERING_AND_QC_FROM_STEP_1 {
             PYCOQC_NO_FILTER.out.unfiltered_flagstat,
             PYCOQC_NO_FILTER.out.filtered_flagstat,
             PYCOQC_NO_FILTER.out.txt,
-            quality_score,
+            qscore_thresh,
             PYCOQC_NO_FILTER.out.unfiltered_pyco_json,
         )
         MAKE_QC_REPORT(
@@ -41,6 +41,6 @@ workflow FILTERING_AND_QC_FROM_STEP_1 {
             PYCOQC_FILTER.out.unfiltered_pyco_json,
             PYCOQC_FILTER.out.filtered_pyco_json,
             mapq,
-            quality_score,
+            qscore_thresh,
         )
 }

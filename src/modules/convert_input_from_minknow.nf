@@ -6,8 +6,8 @@ process CONVERT_INPUT_FROM_MINKNOW_BARCODED {
         path input
 
     output:
-        path "*.bam", emit: bam
-        path "*.txt", emit: txt
+        path ("*.bam"), emit: bam
+        path ("*.txt"), emit: txt
 
     script:
         """
@@ -50,8 +50,8 @@ process CONVERT_INPUT_FROM_MINKNOW_NOT_BARCODED {
         path input
 
     output:
-        path "*.bam", emit: bam
-        path "*.txt", emit: txt
+        path ("*.bam"), emit: bam
+        path ("*.txt"), emit: txt
 
     script:
         """

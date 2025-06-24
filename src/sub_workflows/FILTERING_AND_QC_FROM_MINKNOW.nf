@@ -8,7 +8,7 @@ workflow FILTERING_AND_QC_FROM_MINKNOW {
     take:
         input
         mapq
-        quality_score
+        qscore_thresh
 
     main:
         if (params.is_barcoded == true) {
@@ -32,7 +32,7 @@ workflow FILTERING_AND_QC_FROM_MINKNOW {
             FILTER_BAM.out.unfiltered_flagstat,
             FILTER_BAM.out.filtered_flagstat,
             FILTER_BAM.out.txt,
-            quality_score,
+            qscore_thresh,
         )
         PYCOQC_FILTER(
             PYCOQC_NO_FILTER.out.id,
@@ -41,7 +41,7 @@ workflow FILTERING_AND_QC_FROM_MINKNOW {
             PYCOQC_NO_FILTER.out.unfiltered_flagstat,
             PYCOQC_NO_FILTER.out.filtered_flagstat,
             PYCOQC_NO_FILTER.out.txt,
-            quality_score,
+            qscore_thresh,
             PYCOQC_NO_FILTER.out.unfiltered_pyco_json,
         )
         MAKE_QC_REPORT(
@@ -51,6 +51,6 @@ workflow FILTERING_AND_QC_FROM_MINKNOW {
             PYCOQC_FILTER.out.unfiltered_pyco_json,
             PYCOQC_FILTER.out.filtered_pyco_json,
             mapq,
-            quality_score,
+            qscore_thresh,
         )
 }

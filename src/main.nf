@@ -19,9 +19,9 @@ workflow {
         basecall read trimming option                       : ${params.basecall_trim}
         basecall quality score threshold for basecalling    : ${params.qscore_thresh}
         basecall demultiplexing                             : ${params.basecall_demux}
-        trim barcodes during demultiplexing                 : ${params.trim_barcode}
+        trim barcodes during demultiplexing                 : ${params.trimmed_barcodes}
         submission output file prefix                       : ${params.prefix}
-        GPU device for submission   						: ${params.gpu_devices}
+        GPU device for submission                           : ${params.gpu_devices}
         Output directory                                    : ${params.out_dir}
         =================================================================
         """ 
@@ -47,7 +47,7 @@ workflow {
         ===============================================
         """
     } else {
-        println "ERROR: You must set parameter --step to '1' or '2_from_step_1' or '2_from_minknow' or '3'. Please refer to documentation at: https://github.com/bernardo-heberle/DCNL_NANOPORE_PIPELINE"
+        println "ERROR: You must set parameter --step to '1' or '2_from_step_1' or '2_from_minknow' or '3'. Please refer to documentation at: https://gmapsrv.pucrs.br/gitlab/ccd-public/nanopore"
         System.exit(1)
     }
     // Set initial files and channels
@@ -59,25 +59,25 @@ workflow {
             fast5_path = Channel.fromPath("${params.basecall_path}/**.fast5").map{file -> tuple("${params.prefix}_" + file.parent.toString().split("/")[-2] + "_" + file.simpleName.split('_')[0] + "_" + file.simpleName.split('_')[-3..-2].join("_"), file) }.groupTuple()
             pod5_path = Channel.fromPath("${params.basecall_path}/**.pod5").map{file -> tuple("${params.prefix}_" +  file.parent.toString().split("/")[-2] + "_" + file.simpleName.split('_')[0] + "_" + file.simpleName.split('_')[-3..-2].join("_"), file) }.groupTuple()
         }
-        ref = file(params.ref)
-        quality_score = Channel.value(params.qscore_thresh)
         basecall_speed = Channel.value(params.basecall_speed)
         basecall_mods = Channel.value(params.basecall_mods)
         basecall_config = Channel.value(params.basecall_config)
         basecall_trim = Channel.value(params.basecall_trim)
-        // basecall_compute = Channel.value(params.basecall_compute)
-        trim_barcode = Channel.value(params.trim_barcode)
-        devices = Channel.value(params.gpu_devices)
+        qscore_thresh = Channel.value(params.qscore_thresh)
+        barcoding_kit = Channel.value(params.barcoding_kit)
+        trimmed_barcodes = Channel.value(params.trimmed_barcodes)
+        gpu_devices = Channel.value(params.gpu_devices)
+        reference_file = file(params.reference_file)
     } else if (params.step.toString() == "2_from_step_1") {
-        total_bams = Channel.fromPath("${params.steps_2_and_3_input_directory}/basecalling_output/*.bam").map {file -> tuple(file.baseName, file) }.toSortedList( { a, b -> a[0] <=> b[0] } ).flatten().buffer(size:2) 
-        txts = Channel.fromPath("${params.steps_2_and_3_input_directory}/basecalling_output/*.txt").toSortedList( { a, b -> a.baseName <=> b.baseName } ).flatten()
+        bam_files = Channel.fromPath("${params.steps_2_and_3_input_directory}/basecalling_output/*.bam").map {file -> tuple(file.baseName, file) }.toSortedList( { a, b -> a[0] <=> b[0] } ).flatten().buffer(size:2) 
+        txt_files = Channel.fromPath("${params.steps_2_and_3_input_directory}/basecalling_output/*.txt").toSortedList( { a, b -> a.baseName <=> b.baseName } ).flatten()
         mapq = Channel.value(params.mapq)
-        quality_score = Channel.value(params.qscore_thresh)
+        qscore_thresh = Channel.value(params.qscore_thresh)
     } else if (params.step.toString() == "2_from_minknow") {
         input_dir = Channel.fromPath("${params.steps_2_and_3_input_directory}/")
         mapq = Channel.value(params.mapq)
-        quality_score = Channel.value(params.qscore_thresh)
-    } else if (params.step.toString() == "3") {    
+        qscore_thresh = Channel.value(params.qscore_thresh)
+    } else if (params.step.toString() == "3") {
         filtered_bams = Channel.fromPath("${params.steps_2_and_3_input_directory}/bam_filtering/*-Filtered*.bam").map {file -> tuple(file.baseName, file) }.toSortedList( { a, b -> a[0] <=> b[0] } ).flatten().buffer(size:2) 
         filtered_bais = Channel.fromPath("${params.steps_2_and_3_input_directory}/bam_filtering/*-Filtered*.bam.bai").toSortedList( { a, b -> a.baseName <=> b.baseName } ).flatten() 
         num_reads = Channel.fromPath("${params.steps_2_and_3_input_directory}/intermediate_qc_reports/number_of_reads/*")
@@ -88,11 +88,11 @@ workflow {
     }
     // Run steps
     if (params.step.toString() == "1") {
-        BASECALLING(pod5_path, fast5_path, basecall_speed, basecall_mods, basecall_config, basecall_trim, quality_score, trim_barcode, devices, ref)
+        BASECALLING(pod5_path, fast5_path, basecall_speed, basecall_mods, basecall_config, basecall_trim, qscore_thresh, barcoding_kit, trimmed_barcodes, gpu_devices, reference_file)
     } else if (params.step.toString() == "2_from_step_1") {
-        FILTERING_AND_QC_FROM_STEP_1(total_bams, txts, mapq, quality_score)
+        FILTERING_AND_QC_FROM_STEP_1(bam_files, txt_files, mapq, qscore_thresh)
     } else if (params.step.toString() == "2_from_minknow") {
-        FILTERING_AND_QC_FROM_MINKNOW(input_dir, mapq, quality_score)
+        FILTERING_AND_QC_FROM_MINKNOW(input_dir, mapq, qscore_thresh)
     } else if (params.step.toString()== "3") {
         MODKIT_AND_MULTIQC(filtered_bams, filtered_bais, num_reads, read_length, quality_thresholds, multiqc_config, multiqc_input)
     }

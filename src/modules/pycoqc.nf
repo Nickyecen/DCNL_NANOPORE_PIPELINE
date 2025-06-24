@@ -11,7 +11,7 @@ process PYCOQC_NO_FILTER {
         path unfiltered_flagstat
         path filtered_flagstat
         path seq_summary
-        val quality_score
+        val qscore_thresh
 
     output:
         val ("${id}"), emit: id
@@ -28,7 +28,7 @@ process PYCOQC_NO_FILTER {
         pycoQC -f "${seq_summary}" \
             -v \
             -a "${total_bam}" \
-            --min_pass_qual "${quality_score}" \
+            --min_pass_qual "${qscore_thresh}" \
             -o "./${id}-Unfiltered_pycoqc.html" \
             -j "./${id}-Unfiltered_pycoqc.json"
         """
@@ -45,7 +45,7 @@ process PYCOQC_FILTER {
         path unfiltered_flagstat
         path filtered_flagstat
         path seq_summary
-        val quality_score
+        val qscore_thresh
         path unfiltered_pyco_json
 
     output:
@@ -61,7 +61,7 @@ process PYCOQC_FILTER {
         pycoQC -f "${seq_summary}" \
             -v \
             -a "${filtered_bam}" \
-            --min_pass_qual "${quality_score}" \
+            --min_pass_qual "${qscore_thresh}" \
             -o "./${id}-Filtered_pycoqc.html" \
             -j "./${id}-Filtered_pycoqc.json"
         """
