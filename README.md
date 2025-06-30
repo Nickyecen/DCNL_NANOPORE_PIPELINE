@@ -221,6 +221,10 @@ Many of the parameters for this step are based on dorado basecaller, see their [
 <Type: Path. MultiQC configuration file. We provide a template that works well under "./references/multiqc_config.yaml" in this repository, but you are welcome to customize it as you see fit. Default: "./references/multiqc_config.yaml">
 ```
 
+### Config Profiles
+
+The pipeline also supports running [pre-configured profiles](https://www.nextflow.io/docs/latest/config.html#config-profiles). The currently supported profiles are under the `src/configs/` dir and can be used via the parameter `-profile <name>` option in `nextflow run`. All such profiles make assumptions about the type of data to be used and where they are being stored/output.
+
 [top](#table-of-contents)
 
 ## Pipeline output directory
@@ -309,6 +313,12 @@ The following examples assume your current directory is the root directory of th
               --step 3 \
               -resume
     ```
+
+Alternatively, you can  make use of an existing [configuration profile](#config-profiles) to run one or more of the mentioned steps without the need to specify all parameters (the profiles are optimized for specific types of analysis). For example, the `src/configs/human_blood.config` file implements the `human_blood_basecall` profile, which can be executed from the project root directory as follows:
+
+```sh
+nextflow ./src/main.nf -profile human_blood_basecall
+```
 
 [top](#table-of-contents)
 
