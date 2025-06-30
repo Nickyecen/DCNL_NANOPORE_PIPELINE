@@ -83,9 +83,15 @@ NextFlow pipeline used by the Developmental Cognitive Neuroscience Lab (DCNL) to
 
 ## Pipeline parameters
 
-### Step 1: Basecalling
+The default values for all parameters are set in `src/nexflow.config`. Please notice that it's required to overwrite a few because they depend on the procedure you need to run (e.g., `--step`). The specifics of each are described next.
 
-Many of the parameters for this step are based on dorado basecaller, see their [documentation](https://github.com/nanoporetech/dorado) to understand it better.
+### Global options
+
+```txt
+--project_name
+
+<Type: String. A short name used to identify a project. Default: "default">
+```
 
 ```txt
 --step
@@ -94,21 +100,43 @@ Many of the parameters for this step are based on dorado basecaller, see their [
 ```
 
 ```txt
+--out_dir
+
+<Type: Path. Name of output directory. Output files/directories will be output to "./results/<out_dir>/" in the directory you submitted the pipeline from. Default: "results_<project_name>/">
+```
+
+```txt
+--steps_2_and_3_input_directory
+
+<Type: Path. When performing a step other than 1, this parameter must be set to the output path of the step 1. Example: "./results/<out_dir>". Default = "None">
+```
+
+```txt
+--prefix
+
+<Type: String. Adds a prefix to the beggining of your filenames, good when wanting to keep track of batches of data. Example: "Batch_1". Default: "None">
+```
+
+### Step 1: Basecalling
+
+Many of the parameters for this step are based on dorado basecaller, see their [documentation](https://github.com/nanoporetech/dorado) to understand it better.
+
+```txt
 --basecall_path
 
-<Type: Path. Path to base directory containing all fast5 and/or pod5 files you want to basecall. It will automatically separate samples based on naming conventions and  directory structure. example: /sequencing_run/">
+<Type: Path. Path to base directory containing all fast5 or pod5 files you want to basecall. It will automatically separate samples based on naming conventions and  directory structure. Default: "./data">
 ```
 
 ```txt
 --basecall_speed
 
-<Type: String. "fast", "hac", "sup". Default = "hac">
+<Type: String. "fast", "hac", "sup". Default = "sup@latest">
 ```
 
 ```txt
 --basecall_mods
 
-<Type: String. Comma separated list of base modifications you want to basecall. See dorado docs for more information. Example: "5mCG_5hmCG,5mC_5hmC,6mA". Default: "False">
+<Type: String. Comma separated list of base modifications you want to basecall. See dorado docs for more information. Please note that you can't use more than one modification per nucleotide. Options: "4mC_5mC", "5mCG_5hmCG", "5mC_5hmC", "6mA". Default: "5mC_5hmC">
 ```
 
 ```txt
@@ -120,13 +148,19 @@ Many of the parameters for this step are based on dorado basecaller, see their [
 ```txt
 --basecall_config
 
-<Type: String: configuration name for basecalling setting. This is not necessary since dorado  is able to automatically determine the appropriate configuration. When set to "false" the basecaller will automatically pick the basecall configuration. Example: "dna_r9.4.1_e8_hac@v3.3". Default: "false">
+<Type: String Configuration name for basecalling setting. This is not necessary since dorado  is able to automatically determine the appropriate configuration. Default: "None">
 ```
 
 ```txt
 --basecall_trim
 
-<Type: String. "all", "primers", "adapters", "none". Default: "none">
+<Type: String. Options: "all", "primers", "adapters", "none". Default: "all">
+```
+
+```txt
+--barcoding_kit
+
+<Type: String. Kit name used to barcode the samples. Use "None" to skip --kit-name in basecalling. Default: "SQK-RBK114-24">
 ```
 
 ```txt
@@ -136,13 +170,13 @@ Many of the parameters for this step are based on dorado basecaller, see their [
 ```
 
 ```txt
---demux
+--basecall_demux
 
-<Type: Boolean. "True", "False". Whether you want the data to be demultiplexed setting it to "True" will perform demultiplexing. Default: "False">
+<Type: Boolean. "True", "False". Whether you want the data to be demultiplexed setting it to "True" will perform demultiplexing. Default: false>
 ```
 
 ```txt
---trim_barcodes
+--trimmed_barcodes
 
 <Type: Boolean. "True", "False". Only relevant is --demux is set to "True". if set to "True" barcodes will be trimmed during demultiplexing and will not be present in output "fastq" files. Default: "False">
 ```
@@ -150,39 +184,15 @@ Many of the parameters for this step are based on dorado basecaller, see their [
 ```txt
 --gpu_devices
 
-<Type: String. Which gpu devices to use for basecalling. Only relevant when parameter "--basecall_compute" is set to "gpu". Use the "nvidia-smi" command to see available gpu devices and their current usage. Default: "all". Alternative: "0".  Second Alternative: "0,1,2".
-```
-
-```txt
---prefix
-
-<Type: String. Will add a prefix to the beggining of your filenames, good when wanting to keep track of batches of data. Example: "Batch_1". Default value is "None" which does not add any prefixes>
-```
-
-```txt
---out_dir
-
-<Type: Path. Name of output directory. Output files/directories will be output to "./results/<out_dir>/" in the directory you submitted the pipeline from. Default: "output_directory">
+<Type: String. Which gpu devices to use for basecalling. Only relevant when parameter "--basecall_compute" is set to "gpu". For troubleshooting, you can use the 'nvidia-smi' command to see all the available gpu devices. Options: "0", "0,1,2", ... . Default: "all".
 ```
 
 ### Step 2: Alignment Filtering and Quality Control
 
 ```txt
---step
-
-<same as before>
-```
-
-```txt
---steps_2_and_3_input_directory
-
-<This parameter must be set to the output path of step 1 set with the out_dir parameter. For example "./results/<out_dir>". Default = "None">
-```
-
-```txt
 --qscore_thresh
 
-<Mean quality score threshold for basecalled reads to be considered passing. Should be set to the same value specified in step 1. Default: 9>
+<Type: Integer. Mean quality score threshold for basecalled reads to be considered passing. Should be set to the same value specified in step 1. Default: 9>
 ```
 
 ```txt
@@ -206,21 +216,9 @@ Many of the parameters for this step are based on dorado basecaller, see their [
 ### Step 3: Methylation Calling and MultiQC
 
 ```txt
---step
-
-<same as before>
-```
-
-```txt
---steps_2_and_3_input_directory
-
-<Type: Path. This parameter must be set to the output path of step 1 set with the out_dir parameter. Must also be set to the same as the steps_2_and_3_input_directory for step 2. For example "./results/<out_dir>". Default = "None">
-```
-
-```txt
 --multiqc_config
 
-<Type: Path. MultiQC configuration file. We provide a template that works well under "./references/multiqc_config.yaml" in this repository, but you are welcome to customize it as you see fit. Default: "None">
+<Type: Path. MultiQC configuration file. We provide a template that works well under "./references/multiqc_config.yaml" in this repository, but you are welcome to customize it as you see fit. Default: "./references/multiqc_config.yaml">
 ```
 
 [top](#table-of-contents)
