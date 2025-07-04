@@ -70,8 +70,9 @@ NextFlow pipeline used by the Developmental Cognitive Neuroscience Lab (DCNL) to
       images/debian-nanopore.sif \
       containers/debian-nanopore.def
     ```
+    If the container build fails due to size, it may be related to limitations in the **tmp/** folder, change it with ``export APPTAINER_TMPDIR="path/"``. See [documentation](https://apptainer.org/docs/user/1.0/build_env.html#temporary-folders) for details.
 
-1. You should now be able to run the `nextflow` pipeline (`workflow/main.nf`). See [Pipeline parameters](#pipeline-parameters) and [Examples](#examples) for details.
+1. You should now be able to run the `nextflow` pipeline (`src/main.nf`). See [Pipeline parameters](#pipeline-parameters) and [Examples](#examples) for details.
 
 [openjava]:https://openjdk.org/install/
 [oraclejava]:https://www.java.com/en/download/linux_manual.jsp
